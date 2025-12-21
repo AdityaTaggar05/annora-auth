@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/AdityaTaggar05/connectify-auth/internal/config"
+	"github.com/AdityaTaggar05/connectify-auth/internal/database"
 	"github.com/joho/godotenv"
 
 	"github.com/go-chi/chi/v5"
@@ -13,11 +15,18 @@ import (
 )
 
 func main() {
+	// LOADING ENV VARIABLES
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("[ERR] Error loading .env file")
 	}
+	cfg := config.Load()
 
+	// LOADING DATABASE
+	ctx := context.Background()
+	_ = database.Connect(ctx, cfg.DB_URL)
+
+	// SETUP ROUTER & ROUTES
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -27,6 +36,6 @@ func main() {
 		w.Write([]byte("Hello World!"))
 	})
 
-	http.ListenAndServe(":" + os.Getenv("PORT"), r)
-	fmt.Printf("[DEBUG] Serving on PORT: %s\n", os.Getenv("PORT"))
+	fmt.Printf("[DEBUG] Serving on PORT: %s\n", cfg.PORT)
+	http.ListenAndServe(":" + cfg.PORT, r)
 }
