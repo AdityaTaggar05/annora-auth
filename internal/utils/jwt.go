@@ -12,5 +12,5 @@ func GenerateJWT(id, secret string, exp int) (string, error) {
 		"exp":time.Now().Add(time.Hour * 24 * time.Duration(exp)).Unix(),
 	})
 
-	return token.SignedString(secret)
+	return token.SignedString([]byte(secret))
 }
