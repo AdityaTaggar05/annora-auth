@@ -7,11 +7,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Repository struct {
+type UserRepository struct {
 	DB *pgxpool.Pool
 }
 
-func (r *Repository) CreateUser(ctx context.Context, email, hash string) error {
+func (r *UserRepository) CreateUser(ctx context.Context, email, hash string) error {
 	_, err := r.DB.Exec(ctx,
 	`INSERT INTO users (email, password_hash) VALUES ($1, $2)`,
 	email, hash)
@@ -19,7 +19,7 @@ func (r *Repository) CreateUser(ctx context.Context, email, hash string) error {
 	return err
 }
 
-func (r *Repository) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	var user models.User
 
 	err := r.DB.QueryRow(ctx,

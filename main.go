@@ -28,8 +28,7 @@ func main() {
 	db := database.Connect(ctx, cfg.DB_URL)
 
 	// SETUP HANDLER, SERVICE & REPO
-	repo := &auth.Repository{DB: db}
-	service := &auth.Service{Repo: repo, JWTSecret: cfg.JWT_SECRET}
+	service := auth.NewService(db, cfg)
 	handler := auth.Handler{Service: service}
 
 	// SETUP ROUTER & ROUTES	

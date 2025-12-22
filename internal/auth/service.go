@@ -3,14 +3,24 @@ package auth
 import (
 	"context"
 
+	"github.com/AdityaTaggar05/connectify-auth/internal/config"
 	"github.com/AdityaTaggar05/connectify-auth/internal/utils"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {
-	Repo      *Repository
-	JWTSecret string
-	JWTExp int
+	UserRepo      *UserRepository
+	RefreshRepo *RefreshTokenRepository
+	Config config.Config
+}
+
+func NewService(DB *pgxpool.Pool, cfg config.Config) *Service {
+	return &Service{
+		UserRepo: &UserRepository{DB: DB},
+		RefreshRepo: &RefreshTokenRepository{DB: DB},
+		Config: cfg,
+	}
 }
 
 func (s *Service) Register(ctx context.Context, email, password string) error {
@@ -18,11 +28,11 @@ func (s *Service) Register(ctx context.Context, email, password string) error {
 	if err != nil {
 		return err
 	}
-	return s.Repo.CreateUser(ctx, email, string(hash))
+	return s.UserRepo.CreateUser(ctx, email, string(hash))
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (string, error) {
-	user, err := s.Repo.GetUserByEmail(ctx, email)
+	user, err := s.UserRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
@@ -31,5 +41,5 @@ func (s *Service) Login(ctx context.Context, email, password string) (string, er
 		return "", err
 	}
 
-	return utils.GenerateJWT(user.ID, s.JWTSecret, s.JWTExp)
+	return utils.GenerateJWT(user.ID, s.Config.JWT_SECRET, s.Config.JWT_EXP)
 }
