@@ -20,7 +20,7 @@ func Load() Config {
 
 	return Config{
 		PORT: os.Getenv("PORT"),
-		DB_URL: os.Getenv("DB_URL"),
+		DB_URL: os.Getenv("DATABASE_URL"),
 		JWT_SECRET: os.Getenv("JWT_SECRET"),
 		JWT_EXP: time.Duration(jwt_exp) * time.Minute,
 		REFRESH_EXP: time.Duration(refresh_exp) * (time.Hour * 24),
