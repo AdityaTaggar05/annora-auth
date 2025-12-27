@@ -1,16 +1,18 @@
 package utils
 
 import (
+	"crypto/rsa"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(id, secret string, ttl time.Duration) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":id,
-		"exp":time.Now().Add(ttl).Unix(),
+func GenerateJWT(id string, privateKey *rsa.PrivateKey, ttl time.Duration) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.RegisteredClaims{
+		Subject: id,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+		IssuedAt: jwt.NewNumericDate(time.Now()),
 	})
 
-	return token.SignedString([]byte(secret))
+	return token.SignedString(privateKey)
 }
