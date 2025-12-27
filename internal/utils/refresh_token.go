@@ -1,6 +1,9 @@
 package utils
 
-import "crypto/rand"
+import (
+	"crypto/rand"
+	"encoding/base64"
+)
 
 func GenerateRefreshToken() (string, error) {
 	b := make([]byte, 32)
@@ -9,6 +12,6 @@ func GenerateRefreshToken() (string, error) {
 	if err != nil {
 		return "", nil
 	}
-	
-	return string(b), nil
+
+	return base64.URLEncoding.EncodeToString(b), nil
 }

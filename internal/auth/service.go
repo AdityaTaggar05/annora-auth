@@ -55,7 +55,11 @@ func (s *Service) Login(ctx context.Context, email, password string) (Tokens, er
 	if err != nil {
 		return tokens, err
 	}
-	_ = s.RefreshRepo.Create(ctx, user.ID, tokens.RefreshToken, time.Now().Add(s.Config.REFRESH_EXP))
+	
+	err = s.RefreshRepo.Create(ctx, user.ID, tokens.RefreshToken, time.Now().Add(s.Config.REFRESH_EXP))
+	if err != nil {
+		return tokens, err
+	}
 
 	return tokens, nil
 }
