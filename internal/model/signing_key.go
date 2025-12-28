@@ -4,6 +4,9 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"math/big"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type SigningKey struct {
@@ -24,4 +27,17 @@ func (s *SigningKey) PublicKeyToJWK() map[string]string {
         "n":   n,
         "e":   e,
     }
+}
+
+func GenerateJWT(id string, signingKey *SigningKey, ttl time.Duration) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.RegisteredClaims{
+		Subject: id,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
+		IssuedAt: jwt.NewNumericDate(time.Now()),
+		Issuer: "annora-auth",
+	})
+
+	token.Header["kid"] = signingKey.ID
+
+	return token.SignedString(signingKey.PrivateKey)
 }

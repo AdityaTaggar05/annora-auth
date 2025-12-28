@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/AdityaTaggar05/annora-auth/internal/model"
-	"github.com/AdityaTaggar05/annora-auth/internal/utils"
 )
 
 func (s *Service) Refresh(ctx context.Context, oldToken string) (model.TokenPair, error) {
@@ -22,13 +21,14 @@ func (s *Service) Refresh(ctx context.Context, oldToken string) (model.TokenPair
 		return tokens, err
 	}
 
-	tokens.RefreshToken, err = utils.GenerateRefreshToken()
+	refreshToken, err := model.GenerateRefreshToken(rt.UserID, s.Config.RefreshTTL)
 	if err != nil {
 		return tokens, err
 	}
+	tokens.RefreshToken = refreshToken.Token
 
 	_ = s.TokenRepo.CreateRefreshToken(ctx, rt.UserID, tokens.RefreshToken, time.Now().Add(s.Config.RefreshTTL))
-	tokens.AccessToken, err = utils.GenerateJWT(rt.UserID, s.SigningKey, s.Config.AccessTTL)
+	tokens.AccessToken, err = model.GenerateJWT(rt.UserID, s.SigningKey, s.Config.AccessTTL)
 	if err != nil {
 		return tokens, err
 	}

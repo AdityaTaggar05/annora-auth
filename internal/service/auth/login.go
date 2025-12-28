@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/AdityaTaggar05/annora-auth/internal/model"
-	"github.com/AdityaTaggar05/annora-auth/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,15 +20,16 @@ func (s *Service) Login(ctx context.Context, email, password string) (model.Toke
 		return tokens, err
 	}
 
-	tokens.AccessToken, err = utils.GenerateJWT(user.ID, s.SigningKey, s.Config.AccessTTL)
+	tokens.AccessToken, err = model.GenerateJWT(user.ID, s.SigningKey, s.Config.AccessTTL)
 	if err != nil {
 		return tokens, err
 	}
 
-	tokens.RefreshToken, err = utils.GenerateRefreshToken()
+	refreshToken, err := model.GenerateRefreshToken(user.ID, s.Config.RefreshTTL)
 	if err != nil {
 		return tokens, err
 	}
+	tokens.RefreshToken = refreshToken.Token
 
 	err = s.TokenRepo.CreateRefreshToken(ctx, user.ID, tokens.RefreshToken, time.Now().Add(s.Config.RefreshTTL))
 	if err != nil {
