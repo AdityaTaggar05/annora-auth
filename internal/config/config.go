@@ -37,6 +37,7 @@ func Load() *Config {
 			SMTPPort: getInt("SMTP_PORT", 587),
 			Username: getEnv("SMTP_USERNAME", ""),
 			Password: getEnv("SMTP_PASSWORD", ""),
+			TokenTTL: getDuration("EMAIL_TOKEN_TTL", 4*time.Hour),
 		},
 	}
 }

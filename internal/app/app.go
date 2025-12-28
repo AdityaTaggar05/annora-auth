@@ -14,6 +14,7 @@ import (
 	authhandler "github.com/AdityaTaggar05/annora-auth/internal/handler/https/auth"
 	tokenhandler "github.com/AdityaTaggar05/annora-auth/internal/handler/https/token"
 	"github.com/AdityaTaggar05/annora-auth/internal/infrastructure/db"
+	redisinfra "github.com/AdityaTaggar05/annora-auth/internal/infrastructure/redis"
 	tokeninfra "github.com/AdityaTaggar05/annora-auth/internal/infrastructure/token"
 	authrepo "github.com/AdityaTaggar05/annora-auth/internal/repository/auth"
 	tokenrepo "github.com/AdityaTaggar05/annora-auth/internal/repository/token"
@@ -30,10 +31,14 @@ func New(cfg *config.Config) (*App, error) {
 	// 1) Infrastructure Setup
 	ctx := context.Background()
 	db := db.NewPostgresDB(ctx, cfg.Postgres)
+	defer db.Close()
+	
+	rdb := redisinfra.NewClient(cfg.Redis)
+	defer rdb.Close()
 
 	// 2) Repository Setup
 	authRepo := authrepo.NewRepository(db)
-	tokenRepo := tokenrepo.NewRepository(db)
+	tokenRepo := tokenrepo.NewRepository(db, rdb)
 
 	// 3) Service Setup
 	signingKey, err := tokeninfra.LoadSigningKey(cfg.JWT)
@@ -41,7 +46,7 @@ func New(cfg *config.Config) (*App, error) {
 		log.Fatal(err)
 	}
 
-	authService := authservice.NewService(authRepo, tokenRepo, cfg.JWT, signingKey)
+	authService := authservice.NewService(authRepo, tokenRepo, cfg.JWT, cfg.Email.TokenTTL, signingKey)
 	tokenService := tokenservice.NewService(tokenRepo, cfg.JWT, signingKey)
 
 	// 4) Handler Setup
