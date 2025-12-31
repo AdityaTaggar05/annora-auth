@@ -23,6 +23,12 @@ func Load() *Config {
 			MaxOpenConns: getInt("DB_MAX_OPEN_CONNS", 10),
 		},
 
+		Redis: RedisConfig{
+			Addr: getEnv("REDIS_URL", "localhost:6379"),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB: getInt("REDIS_DB", 0),
+		},
+
 		JWT: JWTConfig{
 			PrivateKeyPath: mustGetEnv("JWT_PRIVATE_KEY_PATH"),
 			PublicKeyPath:  mustGetEnv("JWT_PUBLIC_KEY_PATH"),
