@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  auth:
+    image: annora-auth
+    container_name: annora-auth
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: annora-postgres
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: annora-redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
