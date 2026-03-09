@@ -27,7 +27,9 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		switch err {
 			case authservice.ErrInvalidEmailFormat, authservice.ErrInvalidPasswordFormat:
 				response.BadRequest(w, "Invalid data format", nil)
-			case authservice.ErrUserNotFound, authservice.ErrIncorrectPassword:
+			case authservice.ErrUserNotFound:
+				response.Unauthorized(w, "User not found")
+			case authservice.ErrIncorrectPassword:
 				response.Unauthorized(w, "Invalid Credentials")
 			case authservice.ErrEmailNotVerified:
 				response.Forbidden(w, "Email not verified. Verify it from the link sent to your email!")
