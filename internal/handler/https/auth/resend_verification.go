@@ -2,10 +2,10 @@ package authhandler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	authservice "github.com/AdityaTaggar05/annora-auth/internal/service/auth"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 func (h *Handler) HandleResendVerification(w http.ResponseWriter, r *http.Request) {
@@ -21,14 +21,13 @@ func (h *Handler) HandleResendVerification(w http.ResponseWriter, r *http.Reques
 	if err := h.Service.ResendVerification(r.Context(), req.Email); err != nil {
 		switch err {
 			case authservice.ErrInvalidEmailFormat:
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				response.BadRequest(w, "Invalid email format", nil)
 			case authservice.ErrUserNotFound:
-				http.Error(w, err.Error(), http.StatusNotFound)
+				response.NotFound(w, "User not found")
 			case authservice.ErrTooManyRequests:
-				http.Error(w, err.Error(), http.StatusTooManyRequests)
+				response.Error(w, http.StatusTooManyRequests, "TOO_MANY_REQUESTS", "Too many requests. Try again later!", nil)
 			default:
-				fmt.Println(err.Error())
-				http.Error(w, "internal server error", http.StatusInternalServerError)
+				response.InternalServerError(w, err.Error())
 		}
 		return
 	}

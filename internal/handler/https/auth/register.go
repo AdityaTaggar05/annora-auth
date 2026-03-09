@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	authservice "github.com/AdityaTaggar05/annora-auth/internal/service/auth"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 type registerRequest struct {
@@ -16,21 +17,21 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	var req registerRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		response.BadRequest(w, "Error decoding request body", nil)
 		return
 	}
 
 	if err := h.Service.Register(r.Context(), req.Email, req.Password); err != nil {
 		switch err {
 			case authservice.ErrInvalidEmailFormat, authservice.ErrInvalidPasswordFormat:
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				response.BadRequest(w, "Invalid data format", nil)
 			case authservice.ErrUserAlreadyExists:
-				http.Error(w, err.Error(), http.StatusConflict)
+				response.Error(w, http.StatusConflict, "STATUS_CONFLICT", "User already exists", nil)
 			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				response.InternalServerError(w, err.Error())
 		}
 		return
 	}
 	
-	w.WriteHeader(http.StatusCreated)
+	response.Created(w, nil, "user registered successfully!")
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	authservice "github.com/AdityaTaggar05/annora-auth/internal/service/auth"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 type loginRequest struct {
@@ -16,7 +17,7 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		response.BadRequest(w, "Error decoding request body", nil)
 		return
 	}
 
@@ -25,17 +26,16 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 			case authservice.ErrInvalidEmailFormat, authservice.ErrInvalidPasswordFormat:
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				response.BadRequest(w, "Invalid data format", nil)
 			case authservice.ErrUserNotFound, authservice.ErrIncorrectPassword:
-				http.Error(w, err.Error(), http.StatusUnauthorized)
+				response.Unauthorized(w, "Invalid Credentials")
 			case authservice.ErrEmailNotVerified:
-				http.Error(w, err.Error(), http.StatusForbidden)
+				response.Forbidden(w, "Email not verified. Verify it from the link sent to your email!")
 			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				response.InternalServerError(w, err.Error())
 		}
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tokens)
+	response.JSON(w, http.StatusOK, tokens);
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	tokenservice "github.com/AdityaTaggar05/annora-auth/internal/service/token"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 type refreshRequest struct {
@@ -15,7 +16,7 @@ func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	var req refreshRequest
 	
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "error decoding request body", http.StatusBadRequest)
+		response.BadRequest(w, "Error decoding request body", nil)
 		return
 	}
 
@@ -23,13 +24,12 @@ func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 			case tokenservice.ErrInvalidRefreshTokenFormat, tokenservice.ErrInvalidRefreshToken:
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				response.BadRequest(w, "Invalid refresh token", nil)
 			default:
-				http.Error(w, "internal server error", http.StatusInternalServerError)
+				response.InternalServerError(w, err.Error())
 		}
 		return
 	}
 	
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tokens)
+	response.JSON(w, http.StatusOK, tokens)
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	tokenservice "github.com/AdityaTaggar05/annora-auth/internal/service/token"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 type logoutRequest struct {
@@ -13,17 +14,18 @@ type logoutRequest struct {
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	var req logoutRequest
-	
+
 	json.NewDecoder(r.Body).Decode(&req)
 
-    if err := h.Service.Logout(r.Context(), req.RefreshToken); err != nil {
+	if err := h.Service.Logout(r.Context(), req.RefreshToken); err != nil {
 		switch err {
-			case tokenservice.ErrInvalidRefreshTokenFormat:
-				http.Error(w, err.Error(), http.StatusBadRequest)
-			default:
-				http.Error(w, "internal server error", http.StatusInternalServerError)
+		case tokenservice.ErrInvalidRefreshTokenFormat:
+			response.BadRequest(w, "Invalid refresh token format", nil)
+		default:
+			response.InternalServerError(w, err.Error())
 		}
 		return
 	}
-    w.WriteHeader(http.StatusNoContent)
+
+	w.WriteHeader(http.StatusNoContent)
 }

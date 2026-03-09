@@ -4,13 +4,14 @@ import (
 	"net/http"
 
 	authservice "github.com/AdityaTaggar05/annora-auth/internal/service/auth"
+	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 func (h *Handler) HandleVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	if token == "" {
-		http.Error(w, "token is required", http.StatusBadRequest)
+		response.BadRequest(w, "Token is required", nil)
 		return
 	}
 
@@ -19,13 +20,12 @@ func (h *Handler) HandleVerifyEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 			case authservice.ErrInvalidToken:
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				response.BadRequest(w, "Invalid verification token", nil)
 			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				response.InternalServerError(w, err.Error())
 		}
 		return
 	}
 
-	w.Write([]byte("email verified successfully"))
-	w.WriteHeader(http.StatusOK)
+	response.Success(w, nil, "Email verified successfully!")
 }
