@@ -22,10 +22,8 @@ func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	tokens, err := h.Service.Refresh(r.Context(), req.RefreshToken)
 	if err != nil {
 		switch err {
-			case tokenservice.ErrInvalidRefreshTokenFormat:
+			case tokenservice.ErrInvalidRefreshTokenFormat, tokenservice.ErrInvalidRefreshToken:
 				http.Error(w, err.Error(), http.StatusBadRequest)
-			case tokenservice.ErrInvalidRefreshToken:
-				http.Error(w, err.Error(), http.StatusUnauthorized)
 			default:
 				http.Error(w, "internal server error", http.StatusInternalServerError)
 		}
