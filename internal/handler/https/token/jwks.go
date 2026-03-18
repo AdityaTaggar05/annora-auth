@@ -1,11 +1,12 @@
 package tokenhandler
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"github.com/AdityaTaggar05/annora-auth/pkg/response"
 )
 
 func (h *Handler) HandleJWKS(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, h.Service.JWKS())
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(h.Service.JWKS())
 }
