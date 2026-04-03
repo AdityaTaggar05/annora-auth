@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -34,13 +35,19 @@ func New(cfg *config.Config) (*App, error) {
 	db := db.NewPostgresDB(ctx, cfg.Postgres)
 	rdb := redisinfra.NewClient(cfg.Redis)
 
+	conn := false
 	for range 5 {
 		err := rdb.Ping(ctx).Err()
 		if err == nil {
+			conn = true
 			break
 		}
 		log.Println("Waiting for Redis...")
 		time.Sleep(2 * time.Second)
+	}
+
+	if !conn {
+		log.Fatal(errors.New("[error]: unable to connect to redis"))
 	}
 
 	// 2) Repository Setup
