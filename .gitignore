@@ -4,3 +4,4 @@ tmp
 go.work
 keys/*.pem
 .env
+docker-compose.override.yaml

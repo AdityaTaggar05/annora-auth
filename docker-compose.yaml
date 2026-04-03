@@ -1,5 +1,7 @@
+name: annora-auth
 services:
   auth:
+    container_name: annora-auth
     build: .
     ports:
       - "8080:8080"
@@ -23,29 +25,41 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   migrate:
+    container_name: pg-migrate
     image: migrate/migrate:v4.19.0
     volumes:
       - ./migrations:/migrations
     entrypoint: ["migrate"]
     command: ["-source=file:///migrations", "-database=${DATABASE_URL}", "up"]
+    restart: "no"
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
     image: postgres:16
-    container_name: annora-postgres
+    container_name: auth-postgres
     environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "/usr/bin/pg_isready", "-U", "auth_user", "-d", "auth_db"]
+      test:
+        [
+          "CMD",
+          "/usr/bin/pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-d",
+          "${POSTGRES_DB}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -53,7 +67,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: annora-redis
+    container_name: auth-redis
     volumes:
       - redis_data:/data
     healthcheck:
