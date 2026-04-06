@@ -1,7 +1,7 @@
 name: annora-auth
 services:
   auth:
-    container_name: annora-auth
+    container_name: auth-service
     build: .
     ports:
       - "8080:8080"
@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    container_name: pg-migrate
+    container_name: auth-migrate
     image: migrate/migrate:v4.19.0
     volumes:
       - ./migrations:/migrations
