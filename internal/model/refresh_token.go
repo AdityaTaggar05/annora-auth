@@ -18,7 +18,7 @@ func GenerateRefreshToken(userID string, ttl time.Duration) (RefreshToken, error
 
 	_, err := rand.Read(b)
 	if err != nil {
-		return RefreshToken{}, nil
+		return RefreshToken{}, err
 	}
 
 	token := base64.URLEncoding.EncodeToString(b)

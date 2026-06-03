@@ -11,18 +11,18 @@ import (
 )
 
 func NewPostgresDB(ctx context.Context, cfg config.PostgresConfig) *pgxpool.Pool {
-	pg_cfg, err := pgxpool.ParseConfig(cfg.URL)
-    if err != nil {
-        log.Fatal("[ERR] Unable to connect to database: ", err)
-    }
+	pgCfg, err := pgxpool.ParseConfig(cfg.URL)
+	if err != nil {
+		log.Fatal("[ERR] Unable to connect to database: ", err)
+	}
 
-    pg_cfg.MaxConns = int32(cfg.MaxOpenConns)
-    pg_cfg.MinConns = 5
-    pg_cfg.MaxConnLifetime = time.Hour
+	pgCfg.MaxConns = int32(cfg.MaxOpenConns)
+	pgCfg.MinConns = 5
+	pgCfg.MaxConnLifetime = time.Hour
 
-    DB, err := pgxpool.NewWithConfig(ctx, pg_cfg)
+	DB, err := pgxpool.NewWithConfig(ctx, pgCfg)
 
-    if err != nil {
+	if err != nil {
 		log.Fatal("[ERR] Unable to connect to database: ", err)
 	}
 
@@ -32,5 +32,5 @@ func NewPostgresDB(ctx context.Context, cfg config.PostgresConfig) *pgxpool.Pool
 	}
 	fmt.Println("[DEBUG] Connected to the database!")
 
-    return DB
+	return DB
 }
